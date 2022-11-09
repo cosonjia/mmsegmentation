@@ -92,7 +92,7 @@ def _prepare_input_img(img_path,
 
     if rescale_shape is not None:
         for img_meta in img_metas:
-            img_meta['ori_shape'] = tuple(rescale_shape) + (3, )
+            img_meta['ori_shape'] = tuple(rescale_shape) + (3,)
 
     mm_inputs = {'imgs': imgs, 'img_metas': img_metas}
 
@@ -111,17 +111,17 @@ def _update_input_img(img_list, img_meta_list, update_ori_shape=False):
     pad_shape = img_shape
     new_img_meta_list = [[{
         'img_shape':
-        img_shape,
+            img_shape,
         'ori_shape':
-        ori_shape,
+            ori_shape,
         'pad_shape':
-        pad_shape,
+            pad_shape,
         'filename':
-        img_meta['filename'],
+            img_meta['filename'],
         'scale_factor':
-        (img_shape[1] / ori_shape[1], img_shape[0] / ori_shape[0]) * 2,
+            (img_shape[1] / ori_shape[1], img_shape[0] / ori_shape[0]) * 2,
         'flip':
-        False,
+            False,
     } for _ in range(N)]]
 
     return img_list, new_img_meta_list
@@ -182,18 +182,13 @@ def pytorch2onnx(model,
                     0: 'batch',
                     2: 'height',
                     3: 'width'
-                },
-                'output': {
-                    1: 'batch',
-                    2: 'height',
-                    3: 'width'
                 }
             }
 
     register_extra_symbolics(opset_version)
     with torch.no_grad():
         torch.onnx.export(
-            model, (img_list, ),
+            model, (img_list,),
             output_file,
             input_names=['input'],
             output_names=['output'],
@@ -239,8 +234,9 @@ def pytorch2onnx(model,
         net_feed_input = list(set(input_all) - set(input_initializer))
         assert (len(net_feed_input) == 1)
         sess = rt.InferenceSession(output_file)
-        onnx_result = sess.run(
-            None, {net_feed_input[0]: img_list[0].detach().numpy()})[0][0]
+        ort_outputs = sess.run(
+            None, {net_feed_input[0]: img_list[0].detach().numpy()})
+        onnx_result = ort_outputs[0][0]
         # show segmentation results
         if show:
             import os.path as osp
@@ -259,7 +255,7 @@ def pytorch2onnx(model,
                                       (ori_shape[1], ori_shape[0]))
             show_result_pyplot(
                 model,
-                img, (onnx_result_, ),
+                img, (onnx_result_,),
                 palette=model.PALETTE,
                 block=False,
                 title='ONNXRuntime',
@@ -270,11 +266,12 @@ def pytorch2onnx(model,
                                          (ori_shape[1], ori_shape[0]))
             show_result_pyplot(
                 model,
-                img, (pytorch_result_, ),
+                img, (pytorch_result_,),
                 title='PyTorch',
                 palette=model.PALETTE,
                 opacity=0.5)
         # compare results
+        print(pytorch_result.shape, onnx_result.shape)
         np.testing.assert_allclose(
             pytorch_result.astype(np.float32) / num_classes,
             onnx_result.astype(np.float32) / num_classes,
@@ -297,7 +294,7 @@ def parse_args():
     parser.add_argument(
         '--verify', action='store_true', help='verify the onnx model')
     parser.add_argument('--output-file', type=str, default='tmp.onnx')
-    parser.add_argument('--opset-version', type=int, default=11)
+    parser.add_argument('--opset-version', type=int, default=12)
     parser.add_argument(
         '--shape',
         type=int,
@@ -315,11 +312,11 @@ def parse_args():
         nargs='+',
         action=DictAction,
         help='Override some settings in the used config, the key-value pair '
-        'in xxx=yyy format will be merged into config file. If the value to '
-        'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
-        'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
-        'Note that the quotation marks are necessary and that no white space '
-        'is allowed.')
+             'in xxx=yyy format will be merged into config file. If the value to '
+             'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
+             'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
+             'Note that the quotation marks are necessary and that no white space '
+             'is allowed.')
     parser.add_argument(
         '--dynamic-export',
         action='store_true',
@@ -343,9 +340,9 @@ if __name__ == '__main__':
         input_shape = (1, 3, args.shape[0], args.shape[0])
     elif len(args.shape) == 2:
         input_shape = (
-            1,
-            3,
-        ) + tuple(args.shape)
+                          1,
+                          3,
+                      ) + tuple(args.shape)
     else:
         raise ValueError('invalid input shape')
 

@@ -305,7 +305,7 @@ def get_palette(dataset):
     for name, aliases in dataset_aliases.items():
         for alias in aliases:
             alias2name[alias] = name
-
+    print(alias2name)
     if mmcv.is_str(dataset):
         if dataset in alias2name:
             labels = eval(alias2name[dataset] + '_palette()')
