@@ -121,4 +121,4 @@ mmseg/.mim
 # onnx
 *.onnx
 *.npy
-*.npz
+*.np
